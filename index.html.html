@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Beautiful</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Satoshi:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root { --primary-pink: #ff2d55; --deep-purple: #8a2be2; }
+        body { margin: 0; overflow: hidden; background-color: #0c0a09; color: #f8fafc; font-family: 'Satoshi', sans-serif; }
+        .aurora-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 20% 30%, hsla(333, 70%, 55%, 0.15), transparent 40%), radial-gradient(circle at 80% 70%, hsla(282, 82%, 54%, 0.15), transparent 40%), radial-gradient(circle at 50% 50%, hsla(210, 89%, 60%, 0.1), transparent 50%); filter: blur(60px); animation: auroraMove 20s ease-in-out infinite alternate; }
+        @keyframes auroraMove { 0% { transform: scale(1) translate(0, 0); } 100% { transform: scale(1.2) translate(2%, 3%); } }
+        #three-canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; }
+        .glass-card { background: rgba(12, 10, 9, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border-radius: 24px; display: none; opacity: 0; transform: translateY(30px) scale(0.95); }
+        .active-card { display: block; }
+        .text-gradient { font-family: 'Playfair Display', serif; background: linear-gradient(to right, #fff, #ffb6c1, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-primary { background: linear-gradient(135deg, #ff2d55 0%, #d4003d 100%); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-3px) scale(1.05); }
+        .progress-container { position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; z-index: 100; }
+        #progress-bar { width: 15%; height: 100%; background: linear-gradient(90deg, #ff2d55, #8a2be2); transition: width 0.6s ease; }
+        .bento-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 1.25rem; border-radius: 18px; }
+        .polaroid { background: white; padding: 12px 12px 40px 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: rotate(-3deg); }
+    </style>
+</head>
+<body>
+
+    <div class="aurora-bg"></div>
+    <canvas id="three-canvas"></canvas>
+
+    <audio id="click-sound" preload="auto">
+        <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7838575083.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="scratch-sound" preload="auto" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/1251/1251-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cheer-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <main class="relative z-10 flex items-center justify-center min-h-screen p-6">
+        
+        <div id="step-1" class="glass-card active-card max-w-md w-full p-10 text-center">
+            <div class="text-6xl mb-6 inline-block animate-bounce">❤️</div>
+            <h1 class="text-gradient text-4xl mb-4">Hey Beautiful,</h1>
+            <p class="text-slate-300 mb-8 text-lg">I built a little world for you, just to bring a smile to your face on your special day.</p>
+            <button onclick="nextStep(2)" class="btn-primary text-white px-8 py-3 rounded-full font-bold">Let's Begin</button>
+        </div>
+
+        <div id="step-2" class="glass-card max-w-md w-full p-10 text-center">
+            <div class="text-6xl mb-6">🎉</div>
+            <h1 class="text-gradient text-4xl mb-4">Happy Birthday!</h1>
+            <p class="text-slate-300 mb-8 text-lg">Another year of you making the world brighter. Your existence is a gift, and I'm so lucky to witness it.</p>
+            <button onclick="nextStep(3)" class="btn-primary text-white px-8 py-3 rounded-full font-bold text-lg">There's more...</button>
+        </div>
+
+        <div id="step-3" class="glass-card max-w-2xl w-full p-8">
+            <h2 class="text-gradient text-3xl mb-6 text-center italic">The Little Things...</h2>
+            <div class="grid grid-cols-3 grid-rows-2 gap-3 mb-8">
+                <div class="bento-item col-span-2 border-l-4 border-pink-500 bg-pink-500/5">
+                    <h3 class="font-bold text-pink-400 mb-1 text-lg">✨ Your Kindness</h3>
+                    <p class="text-sm text-slate-400">The way you treat everyone with genuine warmth is truly rare.</p>
+                </div>
+                <div class="bento-item col-span-1 flex flex-col justify-center items-center text-center">
+                    <span class="text-2xl mb-1">😊</span>
+                    <h3 class="font-bold text-pink-400 text-sm">That Smile</h3>
+                    <p class="text-[10px] text-slate-500 uppercase">Pure Magic</p>
+                </div>
+                <div class="bento-item col-span-1 bg-purple-500/5">
+                    <h3 class="font-bold text-purple-400 mb-1 text-sm">🌟 Radiant Spirit</h3>
+                    <p class="text-xs text-slate-400">Infectious energy in every room.</p>
+                </div>
+                <div class="bento-item col-span-2 flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex-shrink-0 animate-pulse"></div>
+                    <div>
+                        <h3 class="font-bold text-white text-sm">Your Resilience</h3>
+                        <p class="text-xs text-slate-400">How you handle everything with such grace.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button onclick="nextStep(4)" class="btn-primary text-white px-8 py-3 rounded-full font-bold">Remember this?</button>
+            </div>
+        </div>
+
+        <div id="step-4" class="glass-card max-w-md w-full p-10 text-center">
+            <h2 class="text-gradient text-3xl mb-6">That One Time...</h2>
+            <div class="flex justify-center mb-8">
+                <div class="polaroid" id="memory-polaroid">
+                    <img src="https://i.ibb.co/BHvTmtby/img3-jpg.jpg" class="w-full h-48 object-cover filter sepia-[0.2]" alt="Memory">
+                    <div class="text-[#333] font-serif mt-4 text-lg">Our favorite memory.</div>
+                </div>
+            </div>
+            <button onclick="nextStep(5)" class="btn-primary text-white px-8 py-3 rounded-full font-bold">A surprise for you...</button>
+        </div>
+
+        <div id="step-5" class="glass-card max-w-md w-full p-10 text-center">
+            <h2 class="text-gradient text-3xl mb-6">A Little Surprise...</h2>
+            <p class="text-slate-400 mb-6 text-sm">Scratch the card to reveal your gift!</p>
+            <div class="relative w-64 h-40 mx-auto mb-8 select-none">
+                <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-xl border-2 border-dashed border-pink-500/50">
+                    <span id="gift-prefix" class="text-pink-400 font-bold text-sm uppercase tracking-widest">You won a</span>
+                    <span id="gift-name" class="text-white font-black text-xl px-2 text-center uppercase">SURPRISE</span>
+                </div>
+                <canvas id="scratch-canvas" width="256" height="160" class="absolute inset-0 rounded-xl touch-none"></canvas>
+            </div>
+            <button id="reveal-next-btn" onclick="nextStep(6)" class="btn-primary text-white px-8 py-3 rounded-full font-bold opacity-0 pointer-events-none transition-opacity duration-500">One last thing...</button>
+        </div>
+
+        <div id="step-6" class="glass-card max-w-md w-full p-10 text-center">
+            <div class="text-6xl mb-6">🎂</div>
+            <h1 class="text-gradient text-4xl mb-4">My Wish For You</h1>
+            <p class="text-slate-300 mb-8 text-lg">May the next year bring you all the love, success, and pure happiness you deserve.</p>
+            <button id="celebrate-btn" onclick="celebrate()" class="btn-primary text-white px-10 py-4 rounded-full font-bold text-xl">Celebrate!</button>
+            <div id="final-message" class="hidden text-2xl font-bold text-pink-500 mt-6">Happy Birthday, my love! ❤️</div>
+        </div>
+
+    </main>
+
+    <script>
+        let scene, camera, renderer, hearts = [], isFinalSequence = false, currentStep = 1;
+        const totalSteps = 6;
+
+        const gifts = [
+            { prefix: "A romantic", name: "Candlelight Dinner" },
+            { prefix: "A relaxing", name: "Spa Day for Two" },
+            { prefix: "That one", name: "Dress you liked" },
+            { prefix: "A weekend", name: "Getaway Trip" },
+            { prefix: "A cozy", name: "Movie Marathon Night" }
+        ];
+
+        // Sounds
+        const clickSound = document.getElementById('click-sound');
+        const scratchSound = document.getElementById('scratch-sound');
+        const cheerSound = document.getElementById('cheer-sound');
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(e => {});
+        }
+
+        function playCheer() {
+            cheerSound.currentTime = 0;
+            cheerSound.play().catch(e => {});
+        }
+
+        function initThree() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo(0,0);
+            heartShape.bezierCurveTo(0,-0.3,-0.6,-0.3,-0.6,0);
+            heartShape.bezierCurveTo(-0.6,0.3,0,0.6,0,1);
+            heartShape.bezierCurveTo(0,0.6,0.6,0.3,0.6,0);
+            heartShape.bezierCurveTo(0.6,-0.3,0,-0.3,0,0);
+
+            const geometry = new THREE.ExtrudeGeometry(heartShape, { depth: 0.1, bevelEnabled: true, bevelSize: 0.1 });
+            for (let i = 0; i < 30; i++) {
+                const material = new THREE.MeshPhongMaterial({ color: new THREE.Color(`hsl(${Math.random() * 10 + 340}, 100%, 65%)`), transparent: true, opacity: 0.7 });
+                const heart = new THREE.Mesh(geometry, material);
+                heart.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, (Math.random()-0.5)*5);
+                heart.rotation.x = Math.PI;
+                heart.scale.set(0.4, 0.4, 0.4);
+                heart.userData = { angle: Math.random()*Math.PI*2 };
+                scene.add(heart);
+                hearts.push(heart);
+            }
+            scene.add(new THREE.PointLight(0xffffff, 1, 100), new THREE.AmbientLight(0x404040));
+            camera.position.z = 8;
+            animateThree();
+        }
+
+        function animateThree() {
+            requestAnimationFrame(animateThree);
+            hearts.forEach(h => {
+                if (!isFinalSequence) {
+                    h.rotation.y += 0.01;
+                    h.position.y += Math.sin(Date.now()*0.001 + h.userData.angle)*0.002;
+                } else {
+                    h.position.y += 0.08; h.material.opacity -= 0.005;
+                }
+            });
+            renderer.render(scene, camera);
+        }
+
+        function nextStep(step) {
+            playClick();
+            const prev = document.getElementById(`step-${currentStep}`);
+            const next = document.getElementById(`step-${step}`);
+            gsap.to(prev, { opacity: 0, y: -30, duration: 0.5, onComplete: () => {
+                prev.style.display = 'none';
+                next.style.display = 'block';
+                gsap.to(next, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" });
+                if(step === 5) {
+                    const randomGift = gifts[Math.floor(Math.random() * gifts.length)];
+                    document.getElementById('gift-prefix').innerText = randomGift.prefix;
+                    document.getElementById('gift-name').innerText = randomGift.name;
+                    initScratchCard();
+                }
+            }});
+            currentStep = step;
+            document.getElementById('progress-bar').style.width = `${(step / totalSteps) * 100}%`;
+        }
+
+        function initScratchCard() {
+            const canvas = document.getElementById('scratch-canvas'), ctx = canvas.getContext('2d');
+            let isDrawing = false, hasConfettiFired = false;
+            ctx.fillStyle = '#4a4a4a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out';
+
+            const startDrawing = () => { isDrawing = true; scratchSound.play().catch(e => {}); };
+            const stopDrawing = () => { isDrawing = false; scratchSound.pause(); scratchSound.currentTime = 0; };
+
+            const scratch = (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.pageX || (e.touches ? e.touches[0].pageX : 0)) - rect.left;
+                const y = (e.pageY || (e.touches ? e.touches[0].pageY : 0)) - rect.top;
+                ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI*2); ctx.fill();
+                
+                const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+                let cleared = 0;
+                for(let i=3; i<data.length; i+=4) if(data[i]===0) cleared++;
+                if(cleared/(canvas.width*canvas.height) > 0.4) {
+                    document.getElementById('reveal-next-btn').classList.remove('opacity-0', 'pointer-events-none');
+                    if(!hasConfettiFired) {
+                        confetti({ particleCount: 40, spread: 70, origin: { y: 0.6 }, colors: ['#ff2d55', '#ffffff'] });
+                        hasConfettiFired = true;
+                    }
+                }
+            };
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(); });
+            window.addEventListener('mouseup', stopDrawing);
+            window.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); scratch(e); });
+        }
+
+        function celebrate() {
+            playCheer(); // Playing Clapping/Cheering Sound
+            isFinalSequence = true;
+            document.getElementById('celebrate-btn').style.display = 'none';
+            const msg = document.getElementById('final-message');
+            msg.classList.remove('hidden');
+            gsap.from(msg, { opacity: 0, scale: 0.5, duration: 1 });
+            const end = Date.now() + 5000;
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff2d55', '#ffffff'] });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff2d55', '#ffffff'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        window.onload = () => { initThree(); gsap.to("#step-1", { opacity: 1, y: 0, scale: 1, duration: 1 }); };
+    </script>
+</body>
+</html>
